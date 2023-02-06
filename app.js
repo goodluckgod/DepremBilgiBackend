@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 3005;
+const got = require('got');
 
 const mysql = require('mysql2');
 const bodyParser = require('body-parser')
@@ -49,7 +50,6 @@ app.get('/counts', (req, res) => {
     connection.query(
         'SELECT * FROM counts',
         function (err, results, fields) {
-
             res.send(results?.[0]);
         }
     );
@@ -63,6 +63,15 @@ app.get('/missing_persons', (req, res) => {
         }
     );
 });
+
+app.get('/earthquakes', (req, res) => {
+    got("https://api.berkealp.net/kandilli/index.php?all").then((response) => {
+        res.send(response.body);
+    }).catch((err) => {
+        res.status(500).send(err);
+    });
+});
+
 
 app.post('/add_missing_person', (req, res) => {
     connection.query(
