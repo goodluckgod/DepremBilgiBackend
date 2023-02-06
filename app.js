@@ -12,6 +12,8 @@ app.use(function (req, res, next) {
     next();
 });
 
+this.earthquakes = []
+
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
@@ -65,11 +67,23 @@ app.get('/missing_persons', (req, res) => {
 });
 
 app.get('/earthquakes', (req, res) => {
-    got("https://api.berkealp.net/kandilli/index.php?all").then((response) => {
-        res.send(response.body);
-    }).catch((err) => {
-        res.status(500).send(err);
-    });
+    got("https://api.orhanaydogdu.com.tr/deprem/live.php")
+        .then((response) => {
+            response.body = JSON.parse(response.body);
+            if (response.body?.result?.length > 0) {
+                this.earthquakes = response.body?.result;
+                res.send(response.body?.result);
+            } else {
+                if (this.earthquakes && this.earthquakes.length > 0) {
+                    res.send(this.earthquakes);
+                    return;
+                }
+                res.status(500).send(response.body);
+                return
+            }
+        }).catch((err) => {
+            res.status(500).send(err);
+        });
 });
 
 
